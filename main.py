@@ -14,6 +14,10 @@ from matplotlib import pyplot as plt
 toloadX = ["./PreProcessed/train/" + i for i in sorted(os.listdir("./PreProcessed/train/")) if "xNormalized" in i]
 toloadY = ["./PreProcessed/train/" + i for i in sorted(os.listdir("./PreProcessed/train/")) if "yNormalized" in i]
 
+# loaded = np.load(toloadY[0])
+# print(toloadY[0])
+# print(loaded.shape)
+
 for i, file in enumerate(toloadX):
     print(file)
     print(toloadY[i])

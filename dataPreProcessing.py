@@ -85,7 +85,6 @@ def prepareData():
 
     xTraining = shuffled["shuffledImages"]
     yTraining = shuffled["shuffledLabels"]
-
     xBatches = []
     yBatches = []
     valXBatches = []
@@ -100,18 +99,25 @@ def prepareData():
     valYBatches = np.array(valYBatches)
     valXBatches = np.array(valXBatches)
 
-    # Normalize the batches and save out to numpy arrays for later use
+    # These will store the labels after one-hot encoding has been applied
+    yEncoded = np.ndarray([len(xBatches), config.TRAIN_SIZE, 2])
+    valYEncoded = np.ndarray([len(valXBatches), config.VALID_SIZE, 2])
 
+    # Normalize the batches and save out to numpy arrays for later use
     for i, batch in enumerate(xBatches):
         np.save(config.PRE_PROCESS_DIR + "train/xNormalized" + str(i) + ".npy", normalizeData(batch))
-        np.save(config.PRE_PROCESS_DIR + "train/yNormalized" + str(i) + ".npy", yBatches[i])
+        yBatches[i] = (yBatches[i] != "dogs").astype(np.float32)
+        yEncoded[i] = (np.arange(2) == yBatches[i][:, None].astype(np.float32)).astype(np.float32)
+        np.save(config.PRE_PROCESS_DIR + "train/yNormalized" + str(i) + ".npy", yEncoded[i])
 
     for i, batch in enumerate(valXBatches):
         np.save(config.PRE_PROCESS_DIR + "train/valXNormalized" + str(i) + ".npy", normalizeData(batch))
-        np.save(config.PRE_PROCESS_DIR + "train/valYNormalized" + str(i) + ".npy", valYBatches[i])
-
-    for i, batch in enumerate([testImages]):
-        np.save(config.PRE_PROCESS_DIR + "test/xTestNormalized" + str(i) + ".npy", normalizeData(batch))
+        valYBatches[i] = (valYBatches[i] != "dogs").astype(np.float32)
+        valYEncoded[i] = (np.arange(2) == valYBatches[i][:, None].astype(np.float32)).astype(np.float32)
+        np.save(config.PRE_PROCESS_DIR + "train/valYNormalized" + str(i) + ".npy", valYEncoded[i])
+    #
+    # for i, batch in enumerate([testImages]):
+    #     np.save(config.PRE_PROCESS_DIR + "test/xTestNormalized" + str(i) + ".npy", normalizeData(batch))
 
 
 #

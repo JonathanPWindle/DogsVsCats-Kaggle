@@ -72,7 +72,7 @@ def prepareData():
     trainingImages = [config.TRAIN_DIR + i for i in os.listdir(config.TRAIN_DIR)]
     trainingDogs = [config.TRAIN_DIR + i for i in os.listdir(config.TRAIN_DIR) if "dog" in i]
     trainingCat = [config.TRAIN_DIR + i for i in os.listdir(config.TRAIN_DIR) if "cat" in i]
-    testImages = [config.TEST_DIR + i for i in os.listdir(config.TEST_DIR)]
+    testImages = [config.TEST_DIR + str(i) + '.jpg' for i in range(1,12501)]
 
     # Ensure the ratio of dogs and cats are accurate
     trainingImages = trainingDogs[:config.TRAIN_DOG_SIZE] + trainingCat[:config.TRAIN_CAT_SIZE]
@@ -80,7 +80,7 @@ def prepareData():
     trainingLabels = np.array((['dogs'] * config.TRAIN_DOG_SIZE) + (['cats'] * config.TRAIN_CAT_SIZE))
     # Add test image filepaths
     testImages = testImages[:config.TEST_SIZE]
-
+    testImages = np.array(testImages)
     shuffled = shuffleData(np.array(trainingImages), np.array(trainingLabels))
 
     xTraining = shuffled["shuffledImages"]
@@ -89,15 +89,22 @@ def prepareData():
     yBatches = []
     valXBatches = []
     valYBatches = []
+    testBatches = []
+
+
     for i in range(0, len(xTraining), config.ALL_TRAIN_SIZE):
         xBatches.append(xTraining[i:i + config.TRAIN_SIZE])
         yBatches.append(yTraining[i:i + config.TRAIN_SIZE])
         valXBatches.append(xTraining[i + config.TRAIN_SIZE: i + config.TRAIN_SIZE + config.VALID_SIZE])
         valYBatches.append(yTraining[i + config.TRAIN_SIZE: i + config.TRAIN_SIZE + config.VALID_SIZE])
+
+    for i in range(0, len(testImages), config.ALL_TRAIN_SIZE):
+        testBatches.append(testImages[i: i + config.ALL_TRAIN_SIZE])
     xBatches = np.array(xBatches)
     yBatches = np.array(yBatches)
     valYBatches = np.array(valYBatches)
     valXBatches = np.array(valXBatches)
+    testBatches = np.array(testBatches)
 
     # These will store the labels after one-hot encoding has been applied
     yEncoded = np.ndarray([len(xBatches), config.TRAIN_SIZE, 2])
@@ -115,9 +122,9 @@ def prepareData():
         valYBatches[i] = (valYBatches[i] != "dogs").astype(np.float32)
         valYEncoded[i] = (np.arange(2) == valYBatches[i][:, None].astype(np.float32)).astype(np.float32)
         np.save(config.PRE_PROCESS_DIR + "train/valYNormalized" + str(i) + ".npy", valYEncoded[i])
-    #
-    # for i, batch in enumerate([testImages]):
-    #     np.save(config.PRE_PROCESS_DIR + "test/xTestNormalized" + str(i) + ".npy", normalizeData(batch))
+
+    for i, batch in enumerate(testBatches):
+        np.save(config.PRE_PROCESS_DIR + "test/xTestNormalized" + str(i) + ".npy", normalizeData(batch))
 
 
 #
